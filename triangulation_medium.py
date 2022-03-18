@@ -29,16 +29,16 @@ def triangulateFace(ax, file, cmap=cm.magma):
 def triangulateSphere(ax, k=30, cmap=cm.magma):
   
     # sphere parametrization
-    U = np.linspace(0, 2 * np.pi, k)
-    V = np.linspace(0, np.pi, k)
+    U = np.linspace(0, np.pi, k)
+    V = np.linspace(0, 2 * np.pi, k)
     S1 = np.zeros((k,k))
     S2 = np.zeros((k,k))
     S3 = np.zeros((k,k))
     for i in range(k):
         for j in range(k):
-            S1[i,j] = np.cos(U[i]) * np.sin(V[j])
-            S2[i,j] = np.sin(U[i]) * np.sin(V[j])
-            S3[i,j] = np.cos(V[j])
+            S1[i,j] = np.cos(U[i]) * np.cos(V[j])
+            S2[i,j] = np.sin(U[i]) * np.cos(V[j])
+            S3[i,j] = np.sin(V[j])
 
     # triangulate the points in [0,2pi] x [0,2pi]
     [T1, T2] = np.meshgrid(U, V)
@@ -54,16 +54,16 @@ def triangulateSphere(ax, k=30, cmap=cm.magma):
 def triangulateEllipsoid(ax, A, k=30,cmap=cm.magma):
     
     # sphere parametrization
-    U = np.linspace(0, 2 * np.pi, k)
-    V = np.linspace(0, np.pi, k)
+    U = np.linspace(0, np.pi, k)
+    V = np.linspace(0, 2 * np.pi, k)
     S1 = np.zeros((k,k))
     S2 = np.zeros((k,k))
     S3 = np.zeros((k,k))
     for i in range(k):
         for j in range(k):
-            S1[i,j] = np.cos(U[i]) * np.sin(V[j])
-            S2[i,j] = np.sin(U[i]) * np.sin(V[j])
-            S3[i,j] = np.cos(V[j])
+            S1[i,j] = np.cos(U[i]) * np.cos(V[j])
+            S2[i,j] = np.sin(U[i]) * np.cos(V[j])
+            S3[i,j] = np.sin(V[j])
 
     # map sphere to elipsoid
     E1 = np.zeros((k,k))
