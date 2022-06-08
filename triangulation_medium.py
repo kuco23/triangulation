@@ -28,20 +28,17 @@ def triangulateFace(ax, file, cmap=cm.magma):
 
 def triangulateSphere(ax, k=30, cmap=cm.magma):
   
-    # sphere parametrization
-    U = np.linspace(0, np.pi, k)
-    V = np.linspace(0, 2 * np.pi, k)
-    S1 = np.zeros((k,k))
-    S2 = np.zeros((k,k))
-    S3 = np.zeros((k,k))
-    for i in range(k):
-        for j in range(k):
-            S1[i,j] = np.cos(U[i]) * np.cos(V[j])
-            S2[i,j] = np.sin(U[i]) * np.cos(V[j])
-            S3[i,j] = np.sin(V[j])
-
-    # triangulate the points in [0,2pi] x [0,2pi]
+    # domain parametrization
+    U = np.linspace(0, 2 * np.pi, k)
+    V = np.linspace(0, np.pi, k)
     [T1, T2] = np.meshgrid(U, V)
+
+    # sphere parametrization
+    S1 = np.cos(T1) * np.sin(T2)
+    S2 = np.sin(T1) * np.sin(T2)
+    S3 = np.cos(T2)
+
+    # triangulate the points in [0,2pi] x [0,pi]
     tri = Delaunay(np.array([T1.flatten(), T2.flatten()]).T)
     
     # plot the sphere
@@ -53,17 +50,15 @@ def triangulateSphere(ax, k=30, cmap=cm.magma):
 
 def triangulateEllipsoid(ax, A, k=30,cmap=cm.magma):
     
+    # domain parametrization
+    U = np.linspace(0, 2 * np.pi, k)
+    V = np.linspace(0, np.pi, k)
+    [T1, T2] = np.meshgrid(U, V)
+
     # sphere parametrization
-    U = np.linspace(0, np.pi, k)
-    V = np.linspace(0, 2 * np.pi, k)
-    S1 = np.zeros((k,k))
-    S2 = np.zeros((k,k))
-    S3 = np.zeros((k,k))
-    for i in range(k):
-        for j in range(k):
-            S1[i,j] = np.cos(U[i]) * np.cos(V[j])
-            S2[i,j] = np.sin(U[i]) * np.cos(V[j])
-            S3[i,j] = np.sin(V[j])
+    S1 = np.cos(T1) * np.sin(T2)
+    S2 = np.sin(T1) * np.sin(T2)
+    S3 = np.cos(T2)
 
     # map sphere to elipsoid
     E1 = np.zeros((k,k))
@@ -74,8 +69,7 @@ def triangulateEllipsoid(ax, A, k=30,cmap=cm.magma):
             xyz = np.array([S1[i,j], S2[i,j], S3[i,j]])
             [E1[i,j], E2[i,j], E3[i,j]] = A @ xyz
 
-    # triangulate the elipsoid
-    [T1, T2] = np.meshgrid(U, V)
+    # triangulate the points in [0,2pi] x [0,pi]
     tri = Delaunay(np.array([T1.flatten(), T2.flatten()]).T)
     
     # plot the elipsoid
