@@ -6,40 +6,34 @@ from mpl_toolkits.mplot3d import Axes3D
 
 ax = plt.figure().gca(projection='3d')
 
-def readFile(file):
+def triangulateFunctionGraph(ax, XYZ, cmap=cm.magma):
+    tri = Delaunay(XYZ[:,:2])
+    ax.plot_trisurf(
+        XYZ[:,0], XYZ[:,1], XYZ[:,2],
+        triangles=tri.simplices, cmap=cmap
+    )
+
+def readFace(file):
     v = []
     with open(file, 'r') as vertices:
         for line in vertices:
             v.append(list(map(float, line.split())))
     return v
-
-def scatter(ax, file):
-    v = readFile(file)
-    for p in v: ax.scatter(*p, color='black', s=10)
             
-def triangulateFace(ax, file, cmap=cm.magma):
-    v = np.array(readFile(file))
-    tri = Delaunay(v[:,:2])
-    ax.plot_trisurf(
-        v[:,0], v[:,1], v[:,2],
-        triangles = tri.simplices,
-        cmap=cmap
-    )
-
 def triangulateSphere(ax, k=30, cmap=cm.magma):
   
     # domain parametrization
     U = np.linspace(0, 2 * np.pi, k)
     V = np.linspace(0, np.pi, k)
-    [T1, T2] = np.meshgrid(U, V)
+    [X, Y] = np.meshgrid(U, V)
 
     # sphere parametrization
-    S1 = np.cos(T1) * np.sin(T2)
-    S2 = np.sin(T1) * np.sin(T2)
-    S3 = np.cos(T2)
+    S1 = np.cos(X) * np.sin(Y)
+    S2 = np.sin(X) * np.sin(Y)
+    S3 = np.cos(Y)
 
     # triangulate the points in [0,2pi] x [0,pi]
-    tri = Delaunay(np.array([T1.flatten(), T2.flatten()]).T)
+    tri = Delaunay(np.array([X.flatten(), Y.flatten()]).T)
     
     # plot the sphere
     ax.plot_trisurf(
@@ -53,12 +47,12 @@ def triangulateEllipsoid(ax, A, k=30,cmap=cm.magma):
     # domain parametrization
     U = np.linspace(0, 2 * np.pi, k)
     V = np.linspace(0, np.pi, k)
-    [T1, T2] = np.meshgrid(U, V)
+    [X, Y] = np.meshgrid(U, V)
 
     # sphere parametrization
-    S1 = np.cos(T1) * np.sin(T2)
-    S2 = np.sin(T1) * np.sin(T2)
-    S3 = np.cos(T2)
+    S1 = np.cos(X) * np.sin(Y)
+    S2 = np.sin(X) * np.sin(Y)
+    S3 = np.cos(Y)
 
     # map sphere to elipsoid
     E1 = np.zeros((k,k))
@@ -70,7 +64,7 @@ def triangulateEllipsoid(ax, A, k=30,cmap=cm.magma):
             [E1[i,j], E2[i,j], E3[i,j]] = A @ xyz
 
     # triangulate the points in [0,2pi] x [0,pi]
-    tri = Delaunay(np.array([T1.flatten(), T2.flatten()]).T)
+    tri = Delaunay(np.array([X.flatten(), Y.flatten()]).T)
     
     # plot the elipsoid
     ax.plot_trisurf(
@@ -78,6 +72,28 @@ def triangulateEllipsoid(ax, A, k=30,cmap=cm.magma):
         triangles=tri.simplices, cmap=cmap
     )
 
+def triangulateSurface(ax, f, u, v, k=30, cmap=cm.magma):
+
+    # domain parametrization
+    U = np.linspace(*u)
+    V = np.linspace(*v)
+    [X, Y] = np.meshgrid(U, V)
+
+    # surface parametrization
+    f1, f2, f3 = f
+    S1 = f1(X, Y)
+    S2 = f2(X, Y)
+    S3 = f3(X, Y)
+
+    # triangulate the points in [u1, u2] x [v1, v2]
+    tri = Delaunay(np.array([X.flatten(), Y.flatten()]).T)
+
+    # plot the surface
+    ax.plot_trisurf(
+        S1.flatten(), S2.flatten(), S3.flatten(),
+        triangles=tri.simplices,
+        cmap=cmap
+    )
 
 A = np.array([
     [-0.01289453, -0.02087514,  0.04109751],
@@ -85,6 +101,18 @@ A = np.array([
     [-0.00431062,  0.07447336, -0.0295528 ]
 ])
 
-triangulateEllipsoid(ax, A)
+torus = lambda a, b: (
+    lambda x, y: (a * np.cos(y) + b) * np.cos(x),
+    lambda x, y: (a * np.cos(y) + b) * np.sin(x),
+    lambda x, y: a * np.sin(y)
+)
+
+kleinBagel = lambda r: (
+    lambda x, y: (r + np.cos(x/2) * np.sin(y) - np.sin(x/2) * np.sin(2*y)) * np.cos(x),
+    lambda x, y: (r + np.cos(x/2) * np.sin(y) - np.sin(x/2) * np.sin(2*y)) * np.sin(x),
+    lambda x, y: np.sin(x/2) * np.sin(y) + np.cos(x/2) * np.sin(2*y)
+)
+
+triangulateSurface(ax, kleinBagel(1), (0,2*np.pi), (0,2*np.pi))
 plt.show()
 
