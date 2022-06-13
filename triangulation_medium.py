@@ -14,11 +14,11 @@ def triangulateFunctionGraph(ax, XYZ, cmap=cm.magma):
     )
 
 def readFace(file):
-    v = []
     with open(file, 'r') as vertices:
-        for line in vertices:
-            v.append(list(map(float, line.split())))
-    return v
+        return np.array([
+            [float(v) for v in line.split()]
+            for line in vertices
+        ])
             
 def triangulateSphere(ax, k=30, cmap=cm.magma):
   
